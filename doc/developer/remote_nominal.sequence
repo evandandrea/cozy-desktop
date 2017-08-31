@@ -1,0 +1,20 @@
+title Authentication Sequence
+
+CozyCouch->RemoteWatcher: UPDATE /parent/src/subdir -> /parent/dst/subdir
+
+RemoteWatcher->Pouchdb: byRemoteIdMaybeAsync
+Pouchdb->RemoteWatcher: was
+
+RemoteWatcher->Prep: deleteDocAsync = deleteFolderAsync(was)
+note over Prep: ignore?
+Prep->Merge: deleteFolderAsync(was)
+Merge->Pouchdb: byID(was)
+Pouchdb->Merge: ?
+
+
+RemoteWatcher->Prep: addDocAsync
+
+
+
+
+CozyCouch->RemoteWatcher: UPDATE /parent/src -> /parent/dst
