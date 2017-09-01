@@ -1,18 +1,25 @@
-title Authentication Sequence
+title Nominal Move from Remote
 
 CozyCouch->RemoteWatcher: UPDATE /parent/src/subdir -> /parent/dst/subdir
 
-RemoteWatcher->Pouchdb: byRemoteIdMaybeAsync
-Pouchdb->RemoteWatcher: was
+RemoteWatcher->Pouchdb1: byRemoteIdMaybeAsync
+Pouchdb1->RemoteWatcher: pdoc[/parent/src/subdir]
 
-RemoteWatcher->Prep: deleteDocAsync = deleteFolderAsync(was)
-note over Prep: ignore?
+RemoteWatcher->Prep: deleteDocAsync(/parent/src/subdir)
 Prep->Merge: deleteFolderAsync(was)
-Merge->Pouchdb: byID(was)
-Pouchdb->Merge: ?
+Merge->Pouchdb2: byID(was)
+Pouchdb2->Merge: pdoc[/parent/src/subdir] (unchanged)
+Merge->Merge: deleteFolderRecursivelyAsync
+Merge->Pouchdb2: bulkDoc(DELETE /parent/src/subdir, /parent/src/subdir/subsub, ...)
+
+Pouchdb2->LocalWriter:
+
+RemoteWatcher->Prep: addDocAsync(/parent/dst/subdir)
+
+Prep->Merge: putFolderAsync(/parent/dst/subdir)
 
 
-RemoteWatcher->Prep: addDocAsync
+
 
 
 
