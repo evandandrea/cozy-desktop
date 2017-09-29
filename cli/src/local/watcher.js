@@ -179,7 +179,25 @@ class LocalWatcher {
   async prepareEvents (events: ChokidarFSEvent[]) : Promise<ContextualizedChokidarFSEvent[]> {
     return Promise
       .all(events.map(async (e: ChokidarFSEvent): Promise<?ContextualizedChokidarFSEvent> => {
-        let e2: Object = {...e}
+
+        const oldMetadata = async (e: ChokidarFSEvent): Promise<?Metadata> => {
+          switch (e.type) {
+            case 'unlink':
+            case 'unlinkDir':
+              try {
+                return await this.pouch.db.get(metadata.id(e.path))
+              } catch (err) {
+                if (err.status !== 404) log.error({err, event: e})
+              }
+            default:
+              return undefined
+          }
+        }
+
+        const e2: Object = {
+          ...e,
+          old: await oldMetadata(e)
+        }
 
         if (e.type === 'add' || e.type === 'change') {
           try {
@@ -208,36 +226,73 @@ class LocalWatcher {
     const actions: PrepAction[] = []
     const pendingDeletions: ContextualizedChokidarFSEvent[] = []
 
+    const getInode = e => (e.old || e.stats || {}).ino
+
     for (let e of events) {
       try {
         switch (e.type) {
           case 'add':
-            const unlinkEvent = findAndRemove(pendingDeletions, e2 => e2.path === e.path)
-            if (unlinkEvent != null) actions.push(prepAction.fromChokidar(unlinkEvent))
-
-            const old = findOldDoc(this.initialScan != null, e.sameChecksums, pendingDeletions)
-            if (old) {
-              actions.push(prepAction.build('MoveFile', e.path, e.stats, e.md5sum, old))
-            } else {
-              actions.push(prepAction.build('AddFile', e.path, e.stats, e.md5sum))
+            {
+              const moveAction = actions.find(a => a.type === 'MoveFile' && getInode(a) === getInode(e))
+              const unlinkAction = findAndRemove(actions, a => a.type === 'UnlinkFile' && getInode(a) === getInode(e))
+              if (moveAction) {
+                // Aggregate with existing move action
+                moveAction.path = e.path // XXX: it the last path the right one? last add event should be right...
+              } else if (unlinkAction) {
+                // New move found
+                actions.push(prepAction.build('MoveFile', e.path, e.stats, e.md5sum, e.old))
+              } else {
+                actions.push(prepAction.build('AddFile', e.path, e.stats, e.md5sum))
+              }
             }
             break
           case 'addDir':
-            // if no child pending deletion
-            // if (!find(pendingDeletions, p => path.dirname(p.path) === e.path)) {
-            const unlinkEventD = findAndRemove(pendingDeletions, e2 => e2.path === e.path)
-            if (unlinkEventD != null) actions.push(prepAction.fromChokidar(unlinkEventD))
-            // }//
-            actions.push(prepAction.build('AddDir', e.path, e.stats))
+            {
+              const moveAction = actions.find(a => a.type === 'MoveDir' && getInode(a) === getInode(e))
+              const unlinkAction = findAndRemove(actions, a => a.type === 'UnlinkDir' && getInode(a) === getInode(e))
+              if (moveAction) {
+                // Aggregate with existing move action
+                moveAction.path = e.path // XXX: it the last path the right one? last add event should be right...
+              } else if (unlinkAction) {
+                // New move found
+                actions.push(prepAction.build('MoveDir', e.path, e.stats, e.old))
+              } else {
+                actions.push(prepAction.build('AddDir', e.path, e.stats))
+              }
+            }
             break
           case 'change':
             actions.push(prepAction.build('Change', e.path, e.stats, e.md5sum))
             break
           case 'unlink':
-            pendingDeletions.push(e)
+            {
+              const moveAction = findAndRemove(actions, a => a.type === 'MoveFile' && getInode(a) === getInode(e))
+              const addAction = findAndRemove(actions, a => a.type === 'AddFile' && getInode(a) === getInode(e))
+              if (moveAction) {
+                // Unlink move src
+                actions.push(prepAction.build('UnlinkFile', moveAction.old.path))
+              } else if (addAction) {
+                // New move found
+                actions.push(prepAction.build('MoveFile', addAction.path, addAction.stats, addAction.md5sum, addAction.old))
+              } else if (getInode(e)) {
+                actions.push(prepAction.build('UnlinkFile', e.path, e.stats, e.md5sum))
+              } // else skip
+            }
             break
           case 'unlinkDir':
-            pendingDeletions.push(e)
+            {
+              const moveAction = findAndRemove(actions, a => a.type === 'MoveDir' && getInode(a) === getInode(e))
+              const addAction = findAndRemove(actions, a => a.type === 'AddDir' && getInode(a) === getInode(e))
+              if (moveAction) {
+                // Unlink move src
+                actions.push(prepAction.build('UnlinkDir', moveAction.old.path))
+              } else if (addAction) {
+                // New move found
+                actions.push(prepAction.build('MoveDir', addAction.path, addAction.stats, addAction.md5sum, addAction.old))
+              } else if (getInode(e)) {
+                actions.push(prepAction.build('UnlinkDir', e.path, e.stats, e.md5sum))
+              } // else skip
+            }
             break
           default:
             throw new TypeError(`Unknown event type: ${e.type}`)

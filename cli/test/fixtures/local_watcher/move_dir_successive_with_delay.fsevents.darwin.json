@@ -15,7 +15,7 @@
     "type": "addDir",
     "path": "parent/dst1/dir",
     "stats": {
-      "ino": 11573326,
+      "ino": 5,
       "size": 136,
       "mtime": "2017-09-28T14:19:49.000Z",
       "ctime": "2017-09-28T14:19:49.000Z"
@@ -25,7 +25,7 @@
     "type": "addDir",
     "path": "parent/src",
     "stats": {
-      "ino": 11573325,
+      "ino": 4,
       "size": 68,
       "mtime": "2017-09-28T14:19:49.000Z",
       "ctime": "2017-09-28T14:19:49.000Z"
@@ -35,7 +35,7 @@
     "type": "addDir",
     "path": "parent/dst1/dir/empty-subdir",
     "stats": {
-      "ino": 11573327,
+      "ino": 6,
       "size": 68,
       "mtime": "2017-09-28T14:19:49.000Z",
       "ctime": "2017-09-28T14:19:49.000Z"
@@ -45,7 +45,7 @@
     "type": "addDir",
     "path": "parent/dst1/dir/subdir",
     "stats": {
-      "ino": 11573328,
+      "ino": 7,
       "size": 102,
       "mtime": "2017-09-28T14:19:49.000Z",
       "ctime": "2017-09-28T14:19:49.000Z"
@@ -71,7 +71,7 @@
     "type": "addDir",
     "path": "parent/dst2/dir",
     "stats": {
-      "ino": 11573326,
+      "ino": 5,
       "size": 136,
       "mtime": "2017-09-28T14:19:49.000Z",
       "ctime": "2017-09-28T14:19:50.000Z"
@@ -81,7 +81,7 @@
     "type": "addDir",
     "path": "parent/dst1",
     "stats": {
-      "ino": 11573323,
+      "ino": 2,
       "size": 68,
       "mtime": "2017-09-28T14:19:50.000Z",
       "ctime": "2017-09-28T14:19:50.000Z"
@@ -91,7 +91,7 @@
     "type": "addDir",
     "path": "parent/dst2/dir/empty-subdir",
     "stats": {
-      "ino": 11573327,
+      "ino": 6,
       "size": 68,
       "mtime": "2017-09-28T14:19:49.000Z",
       "ctime": "2017-09-28T14:19:49.000Z"
@@ -101,7 +101,7 @@
     "type": "addDir",
     "path": "parent/dst2/dir/subdir",
     "stats": {
-      "ino": 11573328,
+      "ino": 7,
       "size": 102,
       "mtime": "2017-09-28T14:19:49.000Z",
       "ctime": "2017-09-28T14:19:49.000Z"
@@ -111,7 +111,7 @@
     "type": "add",
     "path": "parent/dst2/dir/subdir/file",
     "stats": {
-      "ino": 11573329,
+      "ino": 8,
       "size": 8,
       "mtime": "2017-09-28T14:19:49.000Z",
       "ctime": "2017-09-28T14:19:49.000Z"
