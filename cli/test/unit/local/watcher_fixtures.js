@@ -3,6 +3,7 @@
 
 import Promise from 'bluebird'
 import fs from 'fs-extra'
+import _ from 'lodash'
 import path from 'path'
 import should from 'should'
 
@@ -68,15 +69,14 @@ describe('LocalWatcher fixtures', () => {
       if (scenario.init != null) {
         beforeEach('init', async function () {
           for (let {path, ino} of scenario.init) {
-            const _id = metadata.id(path)
-
             // FIXME: We may not need to create dirs/files in the synced dir
             // as soon as we stop using the checksum
             if (path.endsWith('/')) {
+              path = _.trimEnd(path, '/') // XXX: Check in metadata.id?
               console.log('- mkdir', path)
               await fs.ensureDir(abspath(path))
               await this.pouch.put({
-                _id,
+                _id: metadata.id(path),
                 docType: 'folder',
                 updated_at: new Date(),
                 path,
@@ -88,7 +88,7 @@ describe('LocalWatcher fixtures', () => {
               console.log('- >', path)
               await fs.outputFile(abspath(path), '')
               await this.pouch.put({
-                _id,
+                _id: metadata.id(path),
                 md5sum: '1B2M2Y8AsgTpgAmY7PhCfg==', // ''
                 class: 'text',
                 docType: 'file',
