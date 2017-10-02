@@ -37,19 +37,20 @@ export const maybeDeleteFile = (a: PrepAction): ?PrepDeleteFile => a.type === 'P
 export const maybeDeleteFolder = (a: PrepAction): ?PrepDeleteFolder => a.type === 'PrepDeleteFolder' ? a : null
 
 export const find = <T>(actions: PrepAction[], maybeRightType: (PrepAction) => ?T, predicate: (T) => boolean, remove?: true): ?T => {
-  actions.forEach((anyAction, index) => {
+  for (let i=0; i<actions.length; i++) {
+    const anyAction = actions[i]
     const rightTypeAction: ?T = maybeRightType(anyAction)
     if (rightTypeAction != null && predicate(rightTypeAction)) {
-      if (remove) actions.splice(index, 1)
+      if (remove) actions.splice(i, 1)
       return rightTypeAction
     }
-  })
+  }
 }
 
 // TODO: Find by maybeType & inode?
 // TODO: Maybe split find and remove?
 export const findAndRemove = <T>(actions: PrepAction[], maybeRightType: (PrepAction) => ?T, predicate: (T) => boolean): ?T => {
-  find(actions, maybeRightType, predicate, true)
+  return find(actions, maybeRightType, predicate, true)
 }
 
 export const fromChokidar = (e: ContextualizedChokidarFSEvent) : PrepAction => {
