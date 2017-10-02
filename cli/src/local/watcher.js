@@ -323,6 +323,15 @@ class LocalWatcher {
       console.log({e, actions})
     }
 
+    for (let i = 0; i < actions.length; i++) {
+      for (let j = 0; j < actions.length; j++) {
+        if (i !== j && prepAction.isChildMove(actions[i], actions[j])) {
+          actions.splice(j, 1)
+          j--
+        }
+      }
+    }
+
     // To check : Dossier supprimé après ces enfants
     // Détection de fichier
 

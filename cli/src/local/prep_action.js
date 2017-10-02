@@ -53,6 +53,14 @@ export const findAndRemove = <T>(actions: PrepAction[], maybeRightType: (PrepAct
   return find(actions, maybeRightType, predicate, true)
 }
 
+export const isChildMove = (a: PrepAction, b: PrepAction) => {
+  return a.type === 'PrepMoveFolder' &&
+         (b.type === 'PrepMoveFolder' || b.type === 'PrepMoveFile') &&
+        b.path.indexOf(a.path) === 0 &&
+        a.old && b.old &&
+        b.old.path.indexOf(a.old.path) === 0
+}
+
 export const fromChokidar = (e: ContextualizedChokidarFSEvent) : PrepAction => {
   switch (e.type) {
     case 'unlinkDir':
