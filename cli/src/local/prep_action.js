@@ -6,13 +6,13 @@ import _ from 'lodash'
 import type { Metadata } from '../metadata'
 import type { ContextualizedChokidarFSEvent } from './chokidar_event'
 
-export type PrepDeleteFolder = {type: 'PrepDeleteFolder', path: string, ino: ?number}
-export type PrepDeleteFile = {type: 'PrepDeleteFile', path: string, ino: ?number}
+export type PrepDeleteFolder = {type: 'PrepDeleteFolder', path: string, old: ?Metadata, ino: ?number}
+export type PrepDeleteFile = {type: 'PrepDeleteFile', path: string, old: ?Metadata, ino: ?number}
 export type PrepPutFolder = {type: 'PrepPutFolder', path: string, ino: number, stats: fs.Stats}
 export type PrepUpdateFile = {type: 'PrepUpdateFile', path: string, ino: number, stats: fs.Stats, md5sum: string}
 export type PrepAddFile = {type: 'PrepAddFile', path: string, ino: number, stats: fs.Stats, md5sum: string}
-export type PrepMoveFile = {type: 'PrepMoveFile', path: string, ino: number, stats: fs.Stats, md5sum: string, old: Metadata}
-export type PrepMoveFolder = {type: 'PrepMoveFolder', path: string, ino: number, stats: fs.Stats, old: Metadata}
+export type PrepMoveFile = {type: 'PrepMoveFile', path: string, old: Metadata, ino: number, stats: fs.Stats, md5sum: string}
+export type PrepMoveFolder = {type: 'PrepMoveFolder', path: string, old: Metadata, ino: number, stats: fs.Stats}
 
 export type PrepAction =
   | PrepDeleteFolder
@@ -56,9 +56,9 @@ export const findAndRemove = <T>(actions: PrepAction[], maybeRightType: (PrepAct
 export const fromChokidar = (e: ContextualizedChokidarFSEvent) : PrepAction => {
   switch (e.type) {
     case 'unlinkDir':
-      return {type: 'PrepDeleteFolder', path: e.path, ino: (e.old != null ? e.old.ino : null)}
+      return {type: 'PrepDeleteFolder', path: e.path, old: e.old, ino: (e.old != null ? e.old.ino : null)}
     case 'unlink':
-      return {type: 'PrepDeleteFile', path: e.path, ino: (e.old != null ? e.old.ino : null)}
+      return {type: 'PrepDeleteFile', path: e.path, old: e.old, ino: (e.old != null ? e.old.ino : null)}
     case 'addDir':
       return {type: 'PrepPutFolder', path: e.path, stats: e.stats, ino: e.stats.ino}
     case 'change':

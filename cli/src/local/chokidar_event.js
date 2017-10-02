@@ -23,9 +23,9 @@ export const build = (type: string, path?: string, stats?: fs.Stats): ChokidarFS
   return event
 }
 
-type ContextualizedChokidarAdd = {type: 'add', old: ?Metadata, path: string, stats: fs.Stats, md5sum: string, sameChecksums: Metadata[]}
-type ContextualizedChokidarAddDir = {type: 'addDir', old: ?Metadata, path: string, stats: fs.Stats}
-type ContextualizedChokidarChange = {type: 'change', old: ?Metadata, path: string, stats: fs.Stats, md5sum: string}
+type ContextualizedChokidarAdd = {type: 'add', path: string, stats: fs.Stats, md5sum: string, sameChecksums: Metadata[]}
+type ContextualizedChokidarAddDir = {type: 'addDir', path: string, stats: fs.Stats}
+type ContextualizedChokidarChange = {type: 'change', path: string, stats: fs.Stats, md5sum: string}
 type ContextualizedChokidarUnlink = {type: 'unlink', old: ?Metadata, path: string}
 type ContextualizedChokidarUnlinkDir = {type: 'unlinkDir', old: ?Metadata, path: string}
 
