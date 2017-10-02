@@ -363,6 +363,9 @@ class LocalWatcher {
           case 'PrepMoveFile':
             await this.onMoveFile(a.path, a.stats, a.md5sum, a.old)
             break
+          case 'PrepMoveFolder':
+            await this.onMoveFolder(a.path, a.stats, a.old)
+            break
           default:
             throw new Error('wrong actions')
         }
@@ -455,6 +458,17 @@ class LocalWatcher {
     const doc = this.createDoc(filePath, stats, md5sum)
     log.info({path: filePath}, `was moved from ${old.path}`)
     return this.prep.moveFileAsync(SIDE, doc, old).catch(logError)
+  }
+
+  onMoveFolder (folderPath: string, stats: fs.Stats, old: Metadata) {
+    const logError = (err) => log.error({err, path: folderPath})
+    const doc = {
+      path: folderPath,
+      docType: 'folder',
+      updated_at: stats.mtime
+    }
+    log.info({path: folderPath}, `was moved from ${old.path}`)
+    this.prep.moveFolderAsync(SIDE, doc, old).catch(logError)
   }
 
   // New directory detected
