@@ -22,6 +22,7 @@ class SpyPrep {
 
     this.stub('addFileAsync')
     this.stub('moveFileAsync')
+    this.stub('moveFolderAsync')
     this.stub('putFolderAsync')
     this.stub('trashFileAsync')
     this.stub('trashFolderAsync')
