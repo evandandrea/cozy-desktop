@@ -377,7 +377,7 @@ class LocalWatcher {
     }
 
     if (errors.length > 0) {
-      throw new Error(`Could not apply all actions to Prep:\n- ${errors.map(e => e.toString()).join('\n- ')}`)
+      throw new Error(`Could not apply all actions to Prep:\n- ${errors.map(e => e.stack).join('\n- ')}`)
     }
   }
 
