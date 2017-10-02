@@ -345,22 +345,22 @@ class LocalWatcher {
       try {
         switch (a.type) {
           // TODO: Inline old LocalWatcher methods
-          case 'UnlinkDir':
+          case 'PrepDeleteFolder':
             await this.onUnlinkDir(a.path)
             break
-          case 'UnlinkFile':
+          case 'PrepDeleteFile':
             await this.onUnlinkFile(a.path)
             break
-          case 'AddDir':
+          case 'PrepPutFolder':
             await this.onAddDir(a.path, a.stats)
             break
-          case 'Change':
+          case 'PrepUpdateFile':
             await this.onChange(a.path, a.stats, a.md5sum)
             break
-          case 'AddFile':
+          case 'PrepAddFile':
             await this.onAddFile(a.path, a.stats, a.md5sum)
             break
-          case 'MoveFile':
+          case 'PrepMoveFile':
             await this.onMoveFile(a.path, a.stats, a.md5sum, a.old)
             break
           default:
