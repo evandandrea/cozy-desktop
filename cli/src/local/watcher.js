@@ -252,7 +252,7 @@ class LocalWatcher {
                 const unlinkAction: ?PrepDeleteFile = prepAction.findAndRemove(actions, prepAction.maybeDeleteFile, a => a.ino === getInode(e))
                 if (unlinkAction) {
                   // New move found
-                  actions.push(prepAction.build('PrepMoveFile', e.path, _.pick(e, ['stats', 'md5sum', 'old'])))
+                  actions.push(prepAction.build('PrepMoveFile', e.path, {stats: e.stats, md5sum: e.md5sum, old: unlinkAction.old, ino: unlinkAction.ino}))
                 } else {
                   actions.push(prepAction.fromChokidar(e))
                 }
@@ -269,7 +269,7 @@ class LocalWatcher {
                 const unlinkAction: ?PrepDeleteFolder = prepAction.findAndRemove(actions, prepAction.maybeDeleteFolder, a => a.ino === getInode(e))
                 if (unlinkAction) {
                   // New move found
-                  actions.push(prepAction.build('PrepMoveFolder', e.path, {stats: e.stats, old: unlinkAction.old}))
+                  actions.push(prepAction.build('PrepMoveFolder', e.path, {stats: e.stats, old: unlinkAction.old, ino: unlinkAction.ino}))
                 } else {
                   actions.push(prepAction.fromChokidar(e))
                 }
@@ -289,7 +289,7 @@ class LocalWatcher {
                 const addAction: ?PrepAddFile = prepAction.findAndRemove(actions, prepAction.maybeAddFile, a => a.ino === getInode(e))
                 if (addAction) {
                   // New move found
-                  actions.push(prepAction.build('PrepMoveFile', addAction.path, _.pick(addAction, ['stats', 'md5sum', 'old'])))
+                  actions.push(prepAction.build('PrepMoveFile', addAction.path, _.pick(addAction, ['stats', 'md5sum', 'old', 'ino'])))
                 } else if (getInode(e)) {
                   actions.push(prepAction.fromChokidar(e))
                 } // else skip
@@ -306,7 +306,7 @@ class LocalWatcher {
                 const addAction: ?PrepPutFolder = prepAction.findAndRemove(actions, prepAction.maybePutFolder, a => a.ino === getInode(e))
                 if (addAction) {
                   // New move found
-                  actions.push(prepAction.build('PrepMoveFolder', addAction.path, _.pick(addAction, ['stats', 'md5sum', 'old'])))
+                  actions.push(prepAction.build('PrepMoveFolder', addAction.path, _.pick(addAction, ['stats', 'md5sum', 'old', 'ino'])))
                 } else if (getInode(e)) {
                   actions.push(prepAction.fromChokidar(e))
                 } // else skip
