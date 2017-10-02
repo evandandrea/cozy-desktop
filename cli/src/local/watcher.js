@@ -21,7 +21,10 @@ import { findOldDoc, findAndRemove } from './tools'
 
 import type { Checksumer } from './checksumer'
 import type { ChokidarFSEvent, ContextualizedChokidarFSEvent } from './chokidar_event'
-import type {PrepAction} from './prep_action'
+import type {
+  PrepAction, PrepAddFile, PrepPutFolder, PrepUpdateFile,
+  PrepDeleteFile, PrepDeleteFolder, PrepMoveFile, PrepMoveFolder
+} from './prep_action'
 import type { Metadata } from '../metadata'
 import type { Pending } from '../utils/pending' // eslint-disable-line
 
@@ -226,71 +229,87 @@ class LocalWatcher {
     const actions: PrepAction[] = []
     const pendingDeletions: ContextualizedChokidarFSEvent[] = []
 
-    const getInode = e => (e.old || e.stats || {}).ino
+    // TODO: Split by type and move to appropriate modules?
+    const getInode = (e: PrepAction|ContextualizedChokidarFSEvent): ?number => {
+      switch (e.type) {
+        case 'ContextualizedChokidarAdd':
+        case 'ContextualizedChokidarAddDir':
+        case 'ContextualizedChokidarChange':
+        case 'PrepAddFile':
+        case 'PrepPutFolder':
+        case 'PrepUpdateFile':
+        case 'PrepMoveFile':
+        case 'PrepMoveFolder':
+          return e.stats.ino
+        case 'ContextualizedChokidarUnlink':
+        case 'ContextualizedChokidarUnlinkDir':
+          if (e.old != null) return e.old.ino
+      }
+    }
 
-    for (let e of events) {
+    for (let e: ContextualizedChokidarFSEvent of events) {
       try {
         switch (e.type) {
           case 'add':
             {
-              const moveAction = actions.find(a => a.type === 'MoveFile' && getInode(a) === getInode(e))
-              const unlinkAction = findAndRemove(actions, a => a.type === 'UnlinkFile' && getInode(a) === getInode(e))
+              const moveAction: ?PrepMoveFile = prepAction.find(actions, prepAction.maybeMoveFile, a => getInode(a) === getInode(e))
+              const unlinkAction: ?PrepDeleteFile = prepAction.findAndRemove(actions, prepAction.maybeDeleteFile, a => getInode(a) === getInode(e))
               if (moveAction) {
                 // Aggregate with existing move action
                 moveAction.path = e.path // XXX: it the last path the right one? last add event should be right...
               } else if (unlinkAction) {
                 // New move found
-                actions.push(prepAction.build('MoveFile', e.path, e.stats, e.md5sum, e.old))
+                actions.push(prepAction.build('MoveFile', e.path, _.pick(e, ['stats', 'md5sum', 'old'])))
               } else {
-                actions.push(prepAction.build('AddFile', e.path, e.stats, e.md5sum))
+                actions.push(prepAction.fromChokidar(e))
               }
             }
             break
           case 'addDir':
             {
-              const moveAction = actions.find(a => a.type === 'MoveDir' && getInode(a) === getInode(e))
-              const unlinkAction = findAndRemove(actions, a => a.type === 'UnlinkDir' && getInode(a) === getInode(e))
+              const moveAction: ?PrepMoveFolder = prepAction.find(actions, prepAction.maybeMoveFolder, a => getInode(a) === getInode(e))
+              const unlinkAction: ?PrepDeleteFolder = prepAction.findAndRemove(actions, prepAction.maybeDeleteFolder, a => getInode(a) === getInode(e))
               if (moveAction) {
                 // Aggregate with existing move action
                 moveAction.path = e.path // XXX: it the last path the right one? last add event should be right...
               } else if (unlinkAction) {
                 // New move found
-                actions.push(prepAction.build('MoveDir', e.path, e.stats, e.old))
+                actions.push(prepAction.build('MoveDir', e.path, _.pick(e, ['stats', 'old'])))
               } else {
-                actions.push(prepAction.build('AddDir', e.path, e.stats))
+                actions.push(prepAction.fromChokidar(e))
               }
             }
             break
           case 'change':
-            actions.push(prepAction.build('Change', e.path, e.stats, e.md5sum))
+            actions.push(prepAction.fromChokidar(e))
             break
           case 'unlink':
             {
-              const moveAction = findAndRemove(actions, a => a.type === 'MoveFile' && getInode(a) === getInode(e))
-              const addAction = findAndRemove(actions, a => a.type === 'AddFile' && getInode(a) === getInode(e))
+              const moveAction: ?PrepMoveFile = prepAction.findAndRemove(actions, prepAction.maybeMoveFile, a => getInode(a) === getInode(e))
+              const addAction: ?PrepAddFile = prepAction.findAndRemove(actions, prepAction.maybeAddFile, a => getInode(a) === getInode(e))
               if (moveAction) {
                 // Unlink move src
                 actions.push(prepAction.build('UnlinkFile', moveAction.old.path))
               } else if (addAction) {
                 // New move found
-                actions.push(prepAction.build('MoveFile', addAction.path, addAction.stats, addAction.md5sum, addAction.old))
+                actions.push(prepAction.build('MoveFile', addAction.path, _.pick(addAction, ['stats', 'md5sum', 'old'])))
               } else if (getInode(e)) {
-                actions.push(prepAction.build('UnlinkFile', e.path, e.stats, e.md5sum))
+                actions.push(prepAction.fromChokidar(e))
               } // else skip
             }
             break
           case 'unlinkDir':
             {
-              const moveAction = findAndRemove(actions, a => a.type === 'MoveDir' && getInode(a) === getInode(e))
-              const addAction = findAndRemove(actions, a => a.type === 'AddDir' && getInode(a) === getInode(e))
+              const moveAction: ?PrepMoveFolder = prepAction.findAndRemove(actions, prepAction.maybeMoveFolder, a => getInode(a) === getInode(e))
+              const addAction: ?PrepPutFolder = prepAction.findAndRemove(actions, prepAction.maybePutFolder, a => getInode(a) === getInode(e))
               if (moveAction) {
                 // Unlink move src
                 actions.push(prepAction.build('UnlinkDir', moveAction.old.path))
               } else if (addAction) {
                 // New move found
-                actions.push(prepAction.build('MoveDir', addAction.path, addAction.stats, addAction.md5sum, addAction.old))
+                actions.push(prepAction.build('MoveDir', addAction.path, _.pick(addAction, ['stats', 'md5sum', 'old'])))
               } else if (getInode(e)) {
-                actions.push(prepAction.build('UnlinkDir', e.path, e.stats, e.md5sum))
+                actions.push(prepAction.fromChokidar(e))
               } // else skip
             }
             break
