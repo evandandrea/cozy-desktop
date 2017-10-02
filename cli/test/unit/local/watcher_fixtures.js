@@ -69,7 +69,6 @@ describe.skip('LocalWatcher fixtures', () => {
         beforeEach('init', async function () {
           for (let {path, ino} of scenario.init) {
             const _id = metadata.id(path)
-            const updated_at = new Date()
 
             // FIXME: We may not need to create dirs/files in the synced dir
             // as soon as we stop using the checksum
@@ -79,7 +78,7 @@ describe.skip('LocalWatcher fixtures', () => {
               await this.pouch.put({
                 _id,
                 docType: 'folder',
-                updated_at,
+                updated_at: new Date(),
                 path,
                 ino,
                 tags: [],
@@ -94,7 +93,7 @@ describe.skip('LocalWatcher fixtures', () => {
                 class: 'text',
                 docType: 'file',
                 executable: false,
-                updated_at,
+                updated_at: new Date(),
                 mime: 'text/plain',
                 path,
                 size: 0,

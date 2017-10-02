@@ -17,12 +17,11 @@ import Pouch from '../pouch'
 import Prep from '../prep'
 import { PendingMap } from '../utils/pending'
 import { maxDate } from '../timestamp'
-import { findOldDoc, findAndRemove } from './tools'
 
 import type { Checksumer } from './checksumer'
 import type { ChokidarFSEvent, ContextualizedChokidarFSEvent } from './chokidar_event'
 import type {
-  PrepAction, PrepAddFile, PrepPutFolder, PrepUpdateFile,
+  PrepAction, PrepAddFile, PrepPutFolder,
   PrepDeleteFile, PrepDeleteFolder, PrepMoveFile, PrepMoveFolder
 } from './prep_action'
 import type { Metadata } from '../metadata'
@@ -182,7 +181,6 @@ class LocalWatcher {
   async prepareEvents (events: ChokidarFSEvent[]) : Promise<ContextualizedChokidarFSEvent[]> {
     return Promise
       .all(events.map(async (e: ChokidarFSEvent): Promise<?ContextualizedChokidarFSEvent> => {
-
         const oldMetadata = async (e: ChokidarFSEvent): Promise<?Metadata> => {
           switch (e.type) {
             case 'unlink':
@@ -192,9 +190,8 @@ class LocalWatcher {
               } catch (err) {
                 if (err.status !== 404) log.error({err, event: e})
               }
-            default:
-              return undefined
           }
+          return null
         }
 
         const e2: Object = {
