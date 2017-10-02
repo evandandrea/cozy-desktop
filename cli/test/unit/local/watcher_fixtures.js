@@ -97,6 +97,7 @@ describe('LocalWatcher fixtures', () => {
                 updated_at: new Date(),
                 mime: 'text/plain',
                 path,
+                ino,
                 size: 0,
                 tags: [],
                 sides: {local: 1, remote: 1}
