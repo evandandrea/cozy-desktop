@@ -40,7 +40,7 @@ class SpyPrep {
   }
 }
 
-describe.skip('LocalWatcher fixtures', () => {
+describe('LocalWatcher fixtures', () => {
   let watcher, prep
   beforeEach('instanciate config', configHelpers.createConfig)
   beforeEach('instanciate pouch', pouchHelpers.createDatabase)
