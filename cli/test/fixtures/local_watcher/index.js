@@ -1,6 +1,7 @@
 const Promise = require('bluebird')
 const fs = require('fs-extra')
 const path = require('path')
+const {execSync} = require('child_process')
 
 // TODO: Create one dir per scenario with an fsevents subdir
 module.exports.scenarios =
@@ -37,7 +38,7 @@ module.exports.runActions = (scenario, abspath) => {
 
       case 'mv':
         console.log('- mv', action.src, action.dst)
-        return fs.move(abspath(action.src), abspath(action.dst))
+        return fs.rename(abspath(action.src), abspath(action.dst))
 
       case 'wait':
         console.log('- wait', action.ms)
