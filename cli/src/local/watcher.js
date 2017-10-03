@@ -319,7 +319,6 @@ class LocalWatcher {
         log.error({err, path: e.path})
         throw err
       }
-      console.log({e, actions})
     }
 
     for (let i = 0; i < actions.length; i++) {
