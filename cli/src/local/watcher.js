@@ -224,7 +224,6 @@ class LocalWatcher {
 
   sortAndSquash (events: ContextualizedChokidarFSEvent[]) : PrepAction[] {
     const actions: PrepAction[] = []
-    const pendingDeletions: ContextualizedChokidarFSEvent[] = []
 
     // TODO: Split by type and move to appropriate modules?
     const getInode = (e: ContextualizedChokidarFSEvent): ?number => {
@@ -335,15 +334,13 @@ class LocalWatcher {
     // To check : Dossier supprimé après ces enfants
     // Détection de fichier
 
-    const sortedDeletions = _.chain(pendingDeletions)
+    const [deletions, sortedActions] = _.partition(actions, (x) => x.type.startsWith('PrepDelete'))
+    const sortedDeletions = _.chain(deletions)
       .sortBy('path')
       .reverse()
       .value()
 
-    for (let p of sortedDeletions) {
-      actions.push(prepAction.fromChokidar(p))
-    }
-    return actions
+    return sortedActions.concat(sortedDeletions)
   }
 
   // @TODO inline this.onXXX in this function
