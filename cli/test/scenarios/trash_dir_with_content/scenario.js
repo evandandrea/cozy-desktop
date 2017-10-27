@@ -21,7 +21,7 @@ module.exports = {
       'parent/',
       'parent/other_dir/'
     ],
-    remoteTrash: [
+    trash: [
       'file'
       // TODO: Trash with ancestor dir:
       // 'dir/',
