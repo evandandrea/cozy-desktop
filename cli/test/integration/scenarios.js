@@ -97,23 +97,22 @@ for (let scenario of scenarios) {
       if (scenario.expected) {
         const expectedLocalTree = scenario.expected.tree || scenario.expected.localTree
         const expectedRemoteTree = scenario.expected.tree || scenario.expected.remoteTree
-        delete scenario.expected.tree
-        delete scenario.expected.prepCalls // TODO: expect prep actions
+        const expected = {} // TODO: expect prep actions
         const actual = {}
 
         if (expectedLocalTree) {
-          scenario.expected.localTree = expectedLocalTree
+          expected.localTree = expectedLocalTree
           actual.localTree = await helpers.local.tree()
         }
         if (expectedRemoteTree) {
-          scenario.expected.remoteTree = expectedRemoteTree
+          expected.remoteTree = expectedRemoteTree
           actual.remoteTree = await helpers.remote.treeWithoutTrash()
         }
         if (scenario.expected.remoteTrash) {
           actual.remoteTrash = await helpers.remote.trash()
         }
 
-        should(actual).deepEqual(scenario.expected)
+        should(actual).deepEqual(expected)
       }
 
       // TODO: pull
