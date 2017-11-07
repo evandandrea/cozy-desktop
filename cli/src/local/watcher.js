@@ -411,7 +411,7 @@ class LocalWatcher {
           } else {
             // move inside move
             b.old.path = b.old.path.replace(a.old.path, a.path)
-            b.old.needRefetch = true
+            b.needRefetch = true
           }
         }
       }
@@ -471,6 +471,10 @@ class LocalWatcher {
             await this.onAddFile(a.path, a.stats, a.md5sum)
             break
           case 'PrepMoveFile':
+            if (a.needRefetch) {
+              a.old = await this.pouch.db.get(metadata.id(a.old.path))
+              a.old.childMove = false
+            }
             await this.onMoveFile(a.path, a.stats, a.md5sum, a.old)
             break
           case 'PrepMoveFolder':
@@ -578,10 +582,6 @@ class LocalWatcher {
     const logError = (err) => log.error({err, path: filePath})
     const doc = this.createDoc(filePath, stats, md5sum)
     log.info({path: filePath}, `was moved from ${old.path}`)
-    if (old.needRefetch) {
-      old = await this.pouch.db.get(metadata.id(old.path))
-      old.childMove = false
-    }
     return this.prep.moveFileAsync(SIDE, doc, old).catch(logError)
   }
 
