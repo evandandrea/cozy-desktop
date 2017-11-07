@@ -1,0 +1,57 @@
+[
+  {
+    "_id": "ef8d2f345cd41e16d439d700f02262d3",
+    "_rev": "2-426c8d011c1c937c37b830e4797ee630",
+    "created_at": "2017-11-07T17:16:34.943125478+01:00",
+    "dir_id": "ef8d2f345cd41e16d439d700f022597a",
+    "name": "empty-subdir",
+    "path": "/parent/dst/dir/empty-subdir",
+    "tags": [],
+    "type": "directory",
+    "updated_at": "2017-11-07T17:16:34.943125478+01:00"
+  },
+  {
+    "_id": "ef8d2f345cd41e16d439d700f0226cd5",
+    "_rev": "3-2205d0538d9e10230e3bc08dccb2910f",
+    "created_at": "2017-11-07T17:16:35.794191435+01:00",
+    "dir_id": "ef8d2f345cd41e16d439d700f02267aa",
+    "name": "bar-renamed",
+    "path": "/parent/dst/dir/subdir/bar-renamed",
+    "tags": [],
+    "type": "directory",
+    "updated_at": "2017-11-07T17:16:35.794191435+01:00"
+  },
+  {
+    "_id": "ef8d2f345cd41e16d439d700f02267aa",
+    "_rev": "2-ca5c929c3cdbf6d15325d7365655d00d",
+    "created_at": "2017-11-07T17:16:35.177569006+01:00",
+    "dir_id": "ef8d2f345cd41e16d439d700f022597a",
+    "name": "subdir",
+    "path": "/parent/dst/dir/subdir",
+    "tags": [],
+    "type": "directory",
+    "updated_at": "2017-11-07T17:16:35.177569006+01:00"
+  },
+  {
+    "_id": "ef8d2f345cd41e16d439d700f0226a09",
+    "_rev": "3-06d26652afdd8f9758fabd6464040fa9",
+    "created_at": "2017-11-07T17:16:35.494609693+01:00",
+    "dir_id": "ef8d2f345cd41e16d439d700f02267aa",
+    "name": "foo-renamed",
+    "path": "/parent/dst/dir/subdir/foo-renamed",
+    "tags": [],
+    "type": "directory",
+    "updated_at": "2017-11-07T17:16:35.494609693+01:00"
+  },
+  {
+    "_id": "ef8d2f345cd41e16d439d700f022597a",
+    "_rev": "2-3d313159227a0bf71757e13ddfedf7bd",
+    "created_at": "2017-11-07T17:16:34.643944105+01:00",
+    "dir_id": "ef8d2f345cd41e16d439d700f0225775",
+    "name": "dir",
+    "path": "/parent/dst/dir",
+    "tags": [],
+    "type": "directory",
+    "updated_at": "2017-11-07T17:16:34.643944105+01:00"
+  }
+]

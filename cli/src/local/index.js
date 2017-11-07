@@ -32,6 +32,7 @@ const log = logger({
 // It uses a watcher, based on chokidar, to listen for file and folder changes.
 // It also applied changes from the remote cozy on the local filesystem.
 class Local implements Side {
+  name = 'local'
   prep: Prep
   pouch: Pouch
   events: EventEmitter

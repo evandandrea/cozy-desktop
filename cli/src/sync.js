@@ -11,7 +11,6 @@ import { extractRevNumber, isUpToDate } from './metadata'
 import Pouch from './pouch'
 import Remote from './remote'
 import { HEARTBEAT } from './remote/watcher'
-import { PendingMap } from './utils/pending'
 
 import type { SideName, Metadata } from './metadata'
 import type { Side } from './side' // eslint-disable-line
@@ -42,12 +41,10 @@ class Sync {
   events: EventEmitter
   ignore: Ignore
   local: Local
-  pending: PendingMap
+  pendingMoves: {[string]: Metadata}
   pouch: Pouch
   remote: Remote
   stopped: ?boolean
-  moveFrom: ?Metadata
-  moveTo: ?string
 
   diskUsage: () => Promise<*>
 
@@ -61,7 +58,7 @@ class Sync {
     this.local.other = this.remote
     // $FlowFixMe
     this.remote.other = this.local
-    this.pending = new PendingMap()
+    this.pendingMoves = {}
   }
 
   // Start to synchronize the remote cozy with the local filesystem
@@ -171,7 +168,11 @@ class Sync {
   // In some cases, both sides have the change
   async apply (change: Change): Promise<*> {
     let { doc, seq } = change
-    const changeInfo = {path: doc.path, seq}
+    const changeInfo = {
+      path: doc.path,
+      seq,
+      moveTo: doc.moveTo,
+      _deleted: doc._deleted}
     log.debug(changeInfo, 'Applying change...')
     log.trace({change})
 
@@ -200,7 +201,9 @@ class Sync {
       }
 
       log.trace(changeInfo, `Applied change on ${sideName} side`)
-      await this.pouch.setLocalSeqAsync(change.seq)
+      if (this.pendingMoves.length === 0) {
+        await this.pouch.setLocalSeqAsync(change.seq)
+      }
       if (!change.doc._deleted) {
         await this.updateRevs(change.doc, sideName)
       }
@@ -317,35 +320,41 @@ class Sync {
     switch (true) {
       case doc._deleted && (rev === 0):
         return
-      case doc.moveTo != null:
-        this.moveFrom = doc
-        return
-      case this.moveFrom != null:
-        // $FlowFixMe
-        from = (this.moveFrom: Metadata)
-        this.moveFrom = null
-        if (from.moveTo === doc._id && from.md5sum === doc.md5sum) {
-          if (from.childMove) {
-            await side.assignNewRev(doc)
-            return
-          }
-          try {
-            await side.moveFileAsync(doc, from)
-          } catch (err) {
-            this.moveFrom = from
-            throw err
-          }
-        } else {
+      case this.pendingMoves[doc._id] !== undefined:
+        const pending = this.pendingMoves[doc._id]
+        delete this.pendingMoves[doc._id]
+        if (doc._deleted && doc.moveTo) {
+          this.pendingMoves[doc.moveTo] = doc
+          // File does not get updated by stack when moved
+          // if (doc.remote) await side.assignNewRev(doc)
+          doc.childMove = false
+        } else if (pending.md5sum !== doc.md5sum) {
           log.warn({path: doc.path}, 'Invalid move')
           log.trace({from, doc})
           try {
-            await side.trashAsync(from)
+            await side.trashAsync(pending)
           } catch (err) {
             log.error({err, path: doc.path})
           }
           await side.addFileAsync(doc)
+        } else if (pending.childMove) {
+          await side.assignNewRev(doc)
+          return
+        } else {
+          try {
+            await side.moveFileAsync(doc, pending)
+          } catch (err) {
+            // $FlowFixMe
+            this.pendingMoves[pending.moveTo] = pending
+            throw err
+          }
         }
-        break
+        return
+      case doc.moveTo != null:
+        if (doc.moveTo != null) { // Flow
+          this.pendingMoves[doc.moveTo] = doc
+        }
+        return
       case doc._deleted:
         try {
           await side.trashAsync(doc)
@@ -375,42 +384,35 @@ class Sync {
 
   // Same as fileChanged, but for folder
   async folderChangedAsync (doc: Metadata, side: Side, rev: number): Promise<void> {
-    let from
     switch (true) {
       case doc._deleted && (rev === 0):
         return
-      case this.moveFrom != null:
-        // $FlowFixMe
-        from = (this.moveFrom: Metadata)
-        this.moveFrom = null
-        if (from.moveTo === doc._id) {
-          if (from.childMove) {
-            await side.assignNewRev(doc)
+      case this.pendingMoves[doc._id] !== undefined:
+        const pending = this.pendingMoves[doc._id]
+        delete this.pendingMoves[doc._id]
+        if (doc._deleted && doc.moveTo) {
+          this.pendingMoves[doc.moveTo] = doc
+          if (doc.remote) await side.assignNewRev(doc)
+          doc.childMove = false
+        } else {
+          if (pending.childMove) {
+            await side.assignNewRev(pending)
             return
           }
           try {
-            await side.moveFolderAsync(doc, from)
+            await side.moveFolderAsync(doc, pending)
           } catch (err) {
-            this.moveFrom = from
+            // FIXME should never happen
+            // $FlowFixMe
+            this.pendingMoves[pending.moveTo] = pending
             throw err
           }
-        } else {
-          // Since a move requires 2 PouchDB writes, in rare cases the source
-          // and the destination may not match anymore (race condition).
-          // As a fallback, we try to add the folder that should exist, and to
-          // trash the one that shouldn't.
-          log.error({path: doc.path}, 'Invalid move')
-          log.trace({from, doc})
-          try {
-            await side.trashAsync(from)
-          } catch (err) {
-            log.error({err})
-          }
-          await side.addFolderAsync(doc)
         }
-        break
+        return
       case doc.moveTo != null:
-        this.moveFrom = doc
+        if (doc.moveTo != null) {
+          this.pendingMoves[doc.moveTo] = doc
+        }
         return
       case doc._deleted:
         await side.deleteFolderAsync(doc)

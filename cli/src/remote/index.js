@@ -23,6 +23,7 @@ const log = logger({
 })
 
 export default class Remote implements Side {
+  name = 'remote'
   other: FileStreamProvider
   pouch: Pouch
   events: EventEmitter

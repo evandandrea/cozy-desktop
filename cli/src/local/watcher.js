@@ -478,6 +478,10 @@ class LocalWatcher {
             await this.onMoveFile(a.path, a.stats, a.md5sum, a.old)
             break
           case 'PrepMoveFolder':
+            if (a.needRefetch) {
+              a.old = await this.pouch.db.get(metadata.id(a.old.path))
+              a.old.childMove = false
+            }
             await this.onMoveFolder(a.path, a.stats, a.old)
             break
           default:
@@ -578,17 +582,18 @@ class LocalWatcher {
     return this.prep.addFileAsync(SIDE, doc).catch(logError)
   }
 
-  async onMoveFile (filePath: string, stats: fs.Stats, md5sum: string, old: Metadata) {
+  onMoveFile (filePath: string, stats: fs.Stats, md5sum: string, old: Metadata) {
     const logError = (err) => log.error({err, path: filePath})
     const doc = this.createDoc(filePath, stats, md5sum)
-    log.info({path: filePath}, `was moved from ${old.path}`)
+    log.info({path: filePath}, `file was moved from ${old.path}`)
     return this.prep.moveFileAsync(SIDE, doc, old).catch(logError)
   }
 
   onMoveFolder (folderPath: string, stats: fs.Stats, old: Metadata) {
     const logError = (err) => log.error({err, path: folderPath})
     const doc = this.buildDirMetadata(folderPath, stats)
-    log.info({path: folderPath}, `was moved from ${old.path}`)
+    log.info({path: folderPath}, `folder was moved from ${old.path}`)
+    log.trace({path: folderPath, doc, old})
     return this.prep.moveFolderAsync(SIDE, doc, old).catch(logError)
   }
 
