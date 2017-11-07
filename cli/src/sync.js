@@ -171,7 +171,12 @@ class Sync {
   // In some cases, both sides have the change
   async apply (change: Change): Promise<*> {
     let { doc, seq } = change
-    const changeInfo = {path: doc.path, seq}
+    const changeInfo = {
+      path: doc.path,
+      seq,
+      moveTo: doc.moveTo,
+      moveFrom: (this.moveFrom && this.moveFrom.path),
+      _deleted: doc._deleted}
     log.debug(changeInfo, 'Applying change...')
     log.trace({change})
 
@@ -317,10 +322,13 @@ class Sync {
     switch (true) {
       case doc._deleted && (rev === 0):
         return
-      case doc.moveTo != null:
-        this.moveFrom = doc
-        return
       case this.moveFrom != null:
+        if (doc.moveTo != null) {
+          // this.moveFrom.moveTo was probably overwritten by later operation
+          console.log("THERE", this.moveFrom.moveTo)
+          this.moveFrom = null
+          return
+        }
         // $FlowFixMe
         from = (this.moveFrom: Metadata)
         this.moveFrom = null
@@ -346,6 +354,9 @@ class Sync {
           await side.addFileAsync(doc)
         }
         break
+      case doc.moveTo != null:
+        this.moveFrom = doc
+        return
       case doc._deleted:
         try {
           await side.trashAsync(doc)
@@ -380,6 +391,19 @@ class Sync {
       case doc._deleted && (rev === 0):
         return
       case this.moveFrom != null:
+        if (doc.moveTo != null) {
+          // this.moveFrom.moveTo was probably overwritten by later operation
+          console.log("THERE", {
+            doc: {path: doc.path, moveTo: doc.moveTo},
+            moveFrom: {path: this.moveFrom.path, moveTo: this.moveFrom.moveTo}
+          })
+          // let doc2 = await this.pouch.byPathAsync(this.moveFrom.moveTo)
+          // await side.assignNewRev(doc2)
+          // await this.pouch.put(doc2)
+
+          // this.moveFrom = doc
+          // return
+        }
         // $FlowFixMe
         from = (this.moveFrom: Metadata)
         this.moveFrom = null

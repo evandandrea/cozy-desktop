@@ -14,7 +14,7 @@ import * as remoteChange from './change'
 import { inRemoteTrash } from './document'
 
 import type { Metadata } from '../metadata'
-import type { Change, FileMoved } from './change'
+import type { Change, FileMoved, FolderMoved } from './change'
 import type { RemoteDoc, RemoteDeletion } from './document'
 
 const log = logger({
@@ -228,7 +228,7 @@ export default class RemoteWatcher {
       return change
     }
     if (doc.docType === 'folder') {
-      const change = {type: 'FolderMoved', doc, was}
+      const change: FolderMoved = {type: 'FolderMoved', doc, was}
       // Squash moves
       for (let previousChangeIndex = 0; previousChangeIndex < changeIndex; previousChangeIndex++) {
         const previousChange: Change = previousChanges[previousChangeIndex]
@@ -245,12 +245,18 @@ export default class RemoteWatcher {
             })
             continue
           }
-        } else if (remoteChange.isChildMove(previousChange, change)) {
-          return {
-            type: 'IgnoredChange',
-            doc,
-            was,
-            detail: `Folder was moved as descendant of ${_.get(previousChange, 'doc.path')}`
+        } else if ((previousChange.type === 'FolderMoved' || previousChange.type === 'FileMoved') && remoteChange.isChildMove(previousChange, change)) {
+          if (!remoteChange.isOnlyChildMove(previousChange, change)) {
+            change.was.path = remoteChange.applyMoveToPath(previousChange, change.was.path)
+            change.needRefetch = true
+            continue
+          } else {
+            return {
+              type: 'IgnoredChange',
+              doc,
+              was,
+              detail: `Folder was moved as descendant of ${_.get(previousChange, 'doc.path')}`
+            }
           }
         }
       }
@@ -340,6 +346,10 @@ export default class RemoteWatcher {
         break
       case 'FolderMoved':
         log.info({path}, 'folder was moved or renamed remotely')
+        if (change.needRefetch) {
+          change.was = await this.pouch.byRemoteIdMaybeAsync(change.was.remote._id)
+          change.was.childMove = false
+        }
         await this.prep.moveFolderAsync(SIDE, change.doc, change.was)
         break
       case 'FileDissociated':

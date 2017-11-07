@@ -44,16 +44,18 @@ export class IntegrationTestHelpers {
   }
 
   async syncAll () {
-    const seq = await this._pouch.getLocalSeqAsync()
-    const changes = await this._pouch.db.changes({
-      since: seq,
-      include_docs: true,
-      filter: '_view',
-      view: 'byPath'
-    })
-
-    for (let change of changes.results) {
-      await this._sync.apply(change)
+    let seq = await this._pouch.getLocalSeqAsync()
+    while (true) {
+      const changes = await this._pouch.db.changes({
+        limit: 1,
+        since: seq,
+        include_docs: true,
+        filter: '_view',
+        view: 'byPath'
+      })
+      if (changes.results.length === 0) break
+      seq = changes.last_seq
+      await this._sync.apply(changes.results[0])
     }
   }
 
