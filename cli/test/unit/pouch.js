@@ -9,7 +9,27 @@ import sinon from 'sinon'
 import { uniq } from 'lodash'
 
 import configHelpers from '../helpers/config'
+import MetadataBuilders from '../builders/metadata'
 import pouchHelpers from '../helpers/pouch'
+
+describe('Pouch (new tests)', () => {
+  before('instanciate config', configHelpers.createConfig)
+  before('instanciate pouch', pouchHelpers.createDatabase)
+  after('clean pouch', pouchHelpers.cleanDatabase)
+  after('clean config directory', configHelpers.cleanConfig)
+
+  describe('byRecursivePathAsync', function () {
+    it('does not grab same prefix', async function () {
+      const builders = new MetadataBuilders(this.pouch)
+      await builders.dirMetadata().path('parent').create()
+      const c = await builders.dirMetadata().path('parent/child').create()
+      await builders.dirMetadata().path('parent/child/descendant').create()
+      await builders.dirMetadata().path('parent/child2').create()
+      console.log(await this.pouch.byRecursivePathAsync(''))
+      console.log(await this.pouch.byRecursivePathAsync(c._id))
+    })
+  })
+})
 
 describe('Pouch', function () {
   before('instanciate config', configHelpers.createConfig)
@@ -166,6 +186,10 @@ describe('Pouch', function () {
           }
           done()
         })
+      })
+
+      it('does not grab same prefix', async () => {
+
       })
     })
 

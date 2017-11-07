@@ -80,6 +80,7 @@ for (let scenario of scenarios) {
     }
 
     it(localTestName, async function () {
+      this.timeout(60 * 1000)
       if (scenario.init) {
         let relpathFix = _.identity
         if (process.platform === 'win32' && this.currentTest.title.match(/win32/)) {
