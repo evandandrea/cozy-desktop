@@ -269,9 +269,6 @@ class Merge {
         dst.sides[side] = 1
         return this.pouch.bulkDocs([was, dst])
       } else {
-        console.log("was", was.path, was._rev)
-        console.log("doc", doc.path, doc._rev)
-
         await this.ensureParentExistAsync(side, doc)
         return this.pouch.bulkDocs([was, doc])
       }
@@ -302,9 +299,6 @@ class Merge {
         dst.sides[side] = 1
         return this.moveFolderRecursivelyAsync(side, dst, was)
       } else {
-        console.log("was", was.path, was._rev)
-        console.log("doc", doc.path, doc._rev)
-
         await this.ensureParentExistAsync(side, doc)
         return this.moveFolderRecursivelyAsync(side, doc, was)
       }
