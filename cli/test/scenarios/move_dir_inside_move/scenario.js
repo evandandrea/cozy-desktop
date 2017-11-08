@@ -28,8 +28,8 @@ module.exports = {
       'parent/dst/dir/',
       'parent/dst/dir/empty-subdir/',
       'parent/dst/dir/subdir/',
-      'parent/dst/dir/subdir/foo-renamed/',
       'parent/dst/dir/subdir/bar-renamed/',
+      'parent/dst/dir/subdir/foo-renamed/',
       'parent/src/'
     ],
     remoteTrash: []
