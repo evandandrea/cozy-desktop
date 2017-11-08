@@ -4,6 +4,7 @@ import type { SideName, Metadata } from './metadata'
 
 // eslint-disable-next-line no-undef
 export interface Side {
+  name: 'local'|'remote';
   addFileAsync (doc: Metadata): Promise<*>;
   addFolderAsync (doc: Metadata): Promise<*>;
   overwriteFileAsync (doc: Metadata, old: ?Metadata): Promise<*>;

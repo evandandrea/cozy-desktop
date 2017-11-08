@@ -394,8 +394,8 @@ class Sync {
         if (doc.moveTo != null) {
           // this.moveFrom.moveTo was probably overwritten by later operation
           console.log("THERE", {
-            doc: {path: doc.path, moveTo: doc.moveTo},
-            moveFrom: {path: this.moveFrom.path, moveTo: this.moveFrom.moveTo}
+            doc: {path: doc.path, moveTo: doc.moveTo, remote: doc.remote},
+            moveFrom: {path: this.moveFrom.path, moveTo: this.moveFrom.moveTo, remote: this.moveFrom.remote}
           })
           // let doc2 = await this.pouch.byPathAsync(this.moveFrom.moveTo)
           // await side.assignNewRev(doc2)
@@ -418,6 +418,24 @@ class Sync {
             this.moveFrom = from
             throw err
           }
+        } else if (doc.moveTo != null) {
+          // this.moveFrom is the orphan source child (deleted) of a move.
+          // This can happen when moving from/to a moved folder.
+          this.moveFrom = doc
+          log.warn({path: from.path}, `Truncated move to ${JSON.stringify(from.moveTo)}`)
+          log.debug({from})
+          try {
+            const dst = await this.pouch.byRemoteIdAsync(from.remote._id)
+            log.debug({dst})
+            await side.assignNewRev(dst)
+            // await this.updateRevs(dst, side.name)
+            await this.pouch.put(dst)
+          } catch (err) {
+            const docs = await this.pouch.byRecursivePathAsync('')
+            log.debug(docs.map(d => [d.path, d.remote, d.sides]))
+            throw err
+          }
+          return
         } else {
           // Since a move requires 2 PouchDB writes, in rare cases the source
           // and the destination may not match anymore (race condition).
