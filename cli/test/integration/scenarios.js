@@ -59,17 +59,25 @@ beforeEach(async function () {
     })
   }
 
+  sinon.spy(helpers._pouch, 'beforePut')
+  sinon.spy(helpers._sync, 'apply')
+
   // TODO: helpers.setup()
   await helpers.local.setupTrash()
   await helpers.remote.ignorePreviousChanges()
 })
 
 afterEach(function () {
+  helpers._pouch.beforePut.restore()
+  helpers._sync.apply.restore()
+
   // TODO: Include prep actions in custom assertion
   if (this.currentTest.state === 'failed') {
     // TODO: dump logs
   }
 })
+
+const expectedChangeProps = ['path', '_deleted', 'trashed', 'moveTo', 'childMove']
 
 for (let scenario of scenarios) {
   for (let eventsFile of loadFSEventFiles(scenario)) {
@@ -98,9 +106,20 @@ for (let scenario of scenarios) {
       if (scenario.expected) {
         const expectedLocalTree = scenario.expected.tree || scenario.expected.localTree
         const expectedRemoteTree = scenario.expected.tree || scenario.expected.remoteTree
+        const {remoteTrash} = scenario.expected
         const expected = _.pick(scenario.expected, ['remoteTrash'])
         const actual = {}
 
+        if (scenario.expected.savedChanges) {
+          expected.savedChanges = scenario.expected.savedChanges
+          actual.savedChanges = helpers._pouch.beforePut.args.map(
+            args => _.pick(args[0], expectedChangeProps))
+        }
+        if (scenario.expected.appliedChanges) {
+          expected.appliedChanges = scenario.expected.appliedChanges
+          actual.appliedChanges = helpers._sync.apply.args.map(args =>
+            _.pick(args[0].doc, expectedChangeProps))
+        }
         // TODO: expect prep actions
         if (expectedLocalTree) {
           expected.localTree = expectedLocalTree
