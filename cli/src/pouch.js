@@ -88,7 +88,7 @@ class Pouch {
 
   put (doc: Metadata, callback?: Callback) {
     log.debug({path: doc.path, ...doc.sides}, 'Saving metadata...')
-    log.trace({path: doc.path, doc})
+    this.beforePut(doc)
     return this.db.put(doc).asCallback(callback)
   }
 
@@ -96,9 +96,13 @@ class Pouch {
     for (const doc of docs) {
       const {path} = doc
       log.debug({path, ...doc.sides}, 'Saving bulk metadata...')
-      log.trace({path, doc})
+      this.beforePut(doc)
     }
     return this.db.bulkDocs(docs).asCallback(callback)
+  }
+
+  beforePut (doc: Metadata) {
+    log.trace({path: doc.path, doc})
   }
 
   // Run a query and get all the results
