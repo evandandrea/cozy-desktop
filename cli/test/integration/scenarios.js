@@ -64,6 +64,9 @@ describe('Test scenarios', function () {
       })
     }
 
+    sinon.spy(helpers._pouch, 'beforePut')
+    sinon.spy(helpers._sync, 'apply')
+
     // TODO: helpers.setup()
     await helpers.local.setupTrash()
     await helpers.remote.ignorePreviousChanges()
@@ -75,6 +78,8 @@ describe('Test scenarios', function () {
       // TODO: dump logs
     }
   })
+
+  const expectedChangeProps = ['path', '_deleted', 'trashed', 'moveTo', 'childMove']
 
   for (let scenario of scenarios) {
     for (let eventsFile of loadFSEventFiles(scenario)) {
@@ -113,6 +118,16 @@ describe('Test scenarios', function () {
           if (expectedRemoteTree) {
             expected.remoteTree = expectedRemoteTree
             actual.remoteTree = await helpers.remote.treeWithoutTrash()
+          }
+          if (scenario.expected.savedChanges) {
+            expected.savedChanges = scenario.expected.savedChanges
+            actual.savedChanges = helpers._pouch.beforePut.args.map(
+              args => _.pick(args[0], expectedChangeProps))
+          }
+          if (scenario.expected.appliedChanges) {
+            expected.appliedChanges = scenario.expected.appliedChanges
+            actual.appliedChanges = helpers._sync.apply.args.map(args =>
+              _.pick(args[0].doc, expectedChangeProps))
           }
           if (scenario.expected.remoteTrash) {
             actual.remoteTrash = await helpers.remote.trash()

@@ -22,6 +22,87 @@ module.exports = {
       {method: 'moveFolderAsync', dst: 'parent/dst/dir/subdir/foo-renamed', src: 'parent/dst/dir/subdir/foo'},
       {method: 'moveFolderAsync', dst: 'parent/dst/dir/subdir/bar-renamed', src: 'parent/dst/dir/subdir/bar'}
     ],
+    savedChanges: [
+      // FIXME: init changes? unmerged?
+      {path: 'parent'},
+      {path: 'parent/dst'},
+      {path: 'parent/src'},
+      {path: 'parent/src/dir'},
+      {path: 'parent/src/dir/empty-subdir'},
+      {path: 'parent/src/dir/subdir'},
+      {path: 'parent/src/dir/subdir/foo'},
+      {path: 'parent/src/dir/subdir/bar'},
+
+      // parent/src/dir -> parent/dst/dir
+      {path: 'parent/src/dir', _deleted: true, moveTo: 'PARENT/DST/DIR'},
+      {path: 'parent/dst/dir'},
+      {path: 'parent/src/dir/empty-subdir', _deleted: true, moveTo: 'PARENT/DST/DIR/EMPTY-SUBDIR', childMove: true},
+      {path: 'parent/dst/dir/empty-subdir'},
+      {path: 'parent/src/dir/subdir', _deleted: true, moveTo: 'PARENT/DST/DIR/SUBDIR', childMove: true},
+      {path: 'parent/dst/dir/subdir'},
+      {path: 'parent/src/dir/subdir/bar', _deleted: true, moveTo: 'PARENT/DST/DIR/SUBDIR/BAR', childMove: true},
+      {path: 'parent/dst/dir/subdir/bar'},
+      {path: 'parent/src/dir/subdir/foo', _deleted: true, moveTo: 'PARENT/DST/DIR/SUBDIR/FOO', childMove: true},
+      {path: 'parent/dst/dir/subdir/foo'},
+
+      // parent/dst/dir/subdir/bar -> parent/dst/dir/subdir/bar-renamed
+      {path: 'parent/dst/dir/subdir/bar', _deleted: true, moveTo: 'PARENT/DST/DIR/SUBDIR/BAR-RENAMED'},
+      {path: 'parent/dst/dir/subdir/bar-renamed'},
+
+      // parent/dst/dir/subdir/foo -> parent/dst/dir/subdir/foo-renamed
+      {path: 'parent/dst/dir/subdir/foo', _deleted: true, moveTo: 'PARENT/DST/DIR/SUBDIR/FOO-RENAMED'},
+      {path: 'parent/dst/dir/subdir/foo-renamed'},
+
+      // FIXME: ???
+      {path: 'parent/dst/dir'},
+      {path: 'parent/dst/dir/empty-subdir'},
+      {path: 'parent/dst/dir/subdir'}
+    ],
+    appliedChanges: [
+      // FIXME: init changes? unmerged?
+      {path: 'parent'},
+      {path: 'parent/dst'},
+      {path: 'parent/src'},
+
+      // parent/src/dir -> parent/dst/dir
+      {path: 'parent/src/dir', _deleted: true, moveTo: 'PARENT/DST/DIR'},
+      {path: 'parent/dst/dir'},
+      {path: 'parent/src/dir/empty-subdir', _deleted: true, moveTo: 'PARENT/DST/DIR/EMPTY-SUBDIR', childMove: true},
+      {path: 'parent/dst/dir/empty-subdir'},
+      {path: 'parent/src/dir/subdir', _deleted: true, moveTo: 'PARENT/DST/DIR/SUBDIR', childMove: true},
+      {path: 'parent/dst/dir/subdir'},
+      {path: 'parent/src/dir/subdir/bar', _deleted: true, moveTo: 'PARENT/DST/DIR/SUBDIR/BAR', childMove: true},
+      // {path: 'parent/dst/dir/subdir/bar'},
+      {path: 'parent/src/dir/subdir/foo', _deleted: true, moveTo: 'PARENT/DST/DIR/SUBDIR/FOO', childMove: true},
+      // {path: 'parent/dst/dir/subdir/foo'},
+
+      // parent/dst/dir/subdir/bar -> parent/dst/dir/subdir/bar-renamed
+      {path: 'parent/dst/dir/subdir/bar', _deleted: true, moveTo: 'PARENT/DST/DIR/SUBDIR/BAR-RENAMED'},
+      {path: 'parent/dst/dir/subdir/bar-renamed'},
+
+      // parent/dst/dir/subdir/foo -> parent/dst/dir/subdir/foo-renamed
+      {path: 'parent/dst/dir/subdir/foo', _deleted: true, moveTo: 'PARENT/DST/DIR/SUBDIR/FOO-RENAMED'},
+      {path: 'parent/dst/dir/subdir/foo-renamed'},
+
+      // FIXME: ???
+      {path: 'parent/dst/dir'},
+      {path: 'parent/dst/dir/empty-subdir'},
+      {path: 'parent/dst/dir/subdir'},
+
+      // FIXME: Failed changes?
+      {path: 'parent/src/dir/subdir/foo', _deleted: true, moveTo: 'PARENT/DST/DIR/SUBDIR/FOO', childMove: true},
+      {path: 'parent/dst/dir/subdir/bar', _deleted: true, moveTo: 'PARENT/DST/DIR/SUBDIR/BAR-RENAMED'},
+      {path: 'parent/dst/dir/subdir/bar-renamed'},
+      {path: 'parent/dst/dir/subdir/foo', _deleted: true, moveTo: 'PARENT/DST/DIR/SUBDIR/FOO-RENAMED'},
+      {path: 'parent/dst/dir/subdir/foo-renamed'},
+
+      // FIXME: Failed changes again?
+      {path: 'parent/src/dir/subdir/foo', _deleted: true, moveTo: 'PARENT/DST/DIR/SUBDIR/FOO', childMove: true},
+      {path: 'parent/dst/dir/subdir/bar', _deleted: true, moveTo: 'PARENT/DST/DIR/SUBDIR/BAR-RENAMED'},
+      {path: 'parent/dst/dir/subdir/bar-renamed'},
+      {path: 'parent/dst/dir/subdir/foo', _deleted: true, moveTo: 'PARENT/DST/DIR/SUBDIR/FOO-RENAMED'},
+      {path: 'parent/dst/dir/subdir/foo-renamed'}
+    ],
     tree: [
       'parent/',
       'parent/dst/',
