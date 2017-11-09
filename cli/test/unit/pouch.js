@@ -187,6 +187,10 @@ describe('Pouch', function () {
           done()
         })
       })
+
+      it('does not grab same prefix', async () => {
+
+      })
     })
 
     describe('byRemoteId', function () {
