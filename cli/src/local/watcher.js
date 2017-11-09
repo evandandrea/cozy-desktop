@@ -473,14 +473,14 @@ class LocalWatcher {
           case 'PrepMoveFile':
             if (a.needRefetch) {
               a.old = await this.pouch.db.get(metadata.id(a.old.path))
-              a.old.childMove = false
+              // a.old.childMove = false
             }
             await this.onMoveFile(a.path, a.stats, a.md5sum, a.old)
             break
           case 'PrepMoveFolder':
             if (a.needRefetch) {
               a.old = await this.pouch.db.get(metadata.id(a.old.path))
-              a.old.childMove = false
+              // a.old.childMove = false
             }
             await this.onMoveFolder(a.path, a.stats, a.old)
             break
