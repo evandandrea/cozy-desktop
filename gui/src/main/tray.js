@@ -103,7 +103,7 @@ var setState = module.exports.setState = (state, filename) => {
     tray.setImage(`${imgs}/tray-icon-osx/${icon}Template.png`)
     tray.setPressedImage(`${imgs}/tray-icon-osx/${icon}Highlight.png`)
   } else if (process.platform === 'win32'){
-    tray.setImage(`${imgs}/tray-icon-win/${icon}.ico`)
+    tray.setImage(`${imgs}/tray-icon-win/${icon}.png`)
   } else {
     tray.setImage(`${imgs}/tray-icon-linux/${icon}.png`)
   }
