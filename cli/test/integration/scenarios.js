@@ -8,6 +8,9 @@ import path from 'path'
 import should from 'should'
 import sinon from 'sinon'
 
+import { clearDebugLogSync, printDebugLogSync } from '../../src/logger'
+
+import testLogs from '../helpers/logs'
 import { scenarios, loadFSEventFiles, runActions, init } from '../helpers/scenarios'
 import configHelpers from '../helpers/config'
 import * as cozyHelpers from '../helpers/cozy'
@@ -69,12 +72,12 @@ describe('Test scenarios', function () {
     await helpers.remote.ignorePreviousChanges()
   })
 
-  afterEach(function () {
-    // TODO: Include prep actions in custom assertion
-    if (this.currentTest.state === 'failed') {
-      // TODO: dump logs
-    }
-  })
+  if (process.env.DEBUG) {
+    beforeEach(testLogs.clear)
+    afterEach(async function () {
+      if (this.currentTest.state === 'failed') testLogs.dump()
+    })
+  }
 
   for (let scenario of scenarios) {
     for (let eventsFile of loadFSEventFiles(scenario)) {

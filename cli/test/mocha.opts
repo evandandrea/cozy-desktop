@@ -4,6 +4,7 @@
 --compilers js:babel-core/register
 --require babel-polyfill
 --require ./src/globals
+--require ./test/helpers/logs
 --require should
 --require should-sinon
 --require ./test/assertions/timestamp

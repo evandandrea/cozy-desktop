@@ -28,10 +28,19 @@ export const defaultLogger = bunyan.createLogger({
   ]
 })
 
+export const DEBUG_LOG_PATH = 'debug.log'
+
+export const deleteDebugLogSync = () => {
+  if (fs.existsSync(DEBUG_LOG_PATH)) fs.unlinkSync(DEBUG_LOG_PATH)
+}
+
 if (process.env.DEBUG) {
-  const logPath = 'debug.log'
-  if (fs.existsSync(logPath)) fs.unlinkSync(logPath)
-  defaultLogger.addStream({type: 'file', path: logPath, level: 'trace'})
+  deleteDebugLogSync()
+  defaultLogger.addStream({
+    type: 'file',
+    path: DEBUG_LOG_PATH,
+    level: 'trace'
+  })
 }
 if (process.env.TESTDEBUG) {
   defaultLogger.addStream({
