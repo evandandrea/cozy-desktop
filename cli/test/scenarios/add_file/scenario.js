@@ -7,7 +7,7 @@ module.exports = {
       {method: 'addFileAsync', path: 'file'}
     ],
     tree: [
-      'file'
+      'file2',
     ],
     remoteTrash: []
   }

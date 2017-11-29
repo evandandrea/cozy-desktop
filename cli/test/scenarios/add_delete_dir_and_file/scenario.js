@@ -8,7 +8,7 @@ module.exports = {
   ],
   expected: {
     prepCalls: [],
-    tree: [],
+    tree: ['123'],
     remoteTrash: []
   }
 }
