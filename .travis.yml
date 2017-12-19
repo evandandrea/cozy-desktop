@@ -20,6 +20,7 @@ env:
         - MOCHA_TIMEOUT="240000"
         - NODE_ENV=test
         - NPM_CONFIG_PROGRESS=false
+        - secure: chKcNh00gLtu5Og518TsCtxGKKxCRXrEDLCBeOSCu/7IiYP1vr3u5ntDxWBptsWC39D4VFg3fDgitcZpt+BzC2S0YU6UWETi1vi4xhz0l/gRtUhJ+6p5zsjvfYX9h4YTMM9YTZH3ZPClExUGObsXa6t+52tP13S0wUHWH28xEes=
 services:
     - docker
 cache:
@@ -90,6 +91,7 @@ script:
     - yarn lint
     - yarn test:unit -- --timeout $MOCHA_TIMEOUT
     - yarn test:integration -- --timeout $MOCHA_TIMEOUT
+    - yarn dist
 
 after_success:
     - bash <(curl -s https://codecov.io/bash)
