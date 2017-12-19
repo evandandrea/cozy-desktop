@@ -33,6 +33,8 @@ addons:
         packages:
             - gcc-4.8
             - g++-4.8
+            - graphicsmagick
+            - icnsutils
 
 # install cozy stack for integration test
 before_install:
