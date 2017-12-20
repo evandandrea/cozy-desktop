@@ -93,7 +93,7 @@ script:
     - yarn lint
     - yarn test:unit -- --timeout $MOCHA_TIMEOUT
     - yarn test:integration -- --timeout $MOCHA_TIMEOUT
-    - yarn dist
+    - yarn dist:publish
 
 after_success:
     - bash <(curl -s https://codecov.io/bash)
