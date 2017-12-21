@@ -17,7 +17,7 @@ test_script:
   - yarn build:core
   # - cmd: yarn test:unit -- --timeout $env:MOCHA_TIMEOUT
   # - cmd: yarn test:integration -- --timeout $env:MOCHA_TIMEOUT
-  - yarn dist
+  - yarn dist:all
 
 on_failure:
   - node --version
