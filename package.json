@@ -1,5 +1,5 @@
 {
-  "name": "cozy-desktop",
+  "name": "CozyDrive",
   "productName": "Cozy Drive",
   "private": true,
   "version": "3.4.1-alpha.autobuild.1",
@@ -211,8 +211,6 @@
       "target": [
         "AppImage"
       ],
-      "artifactName": "CozyDrive-${version}-${arch}.${ext}",
-      "executableName": "CozyDrive",
       "category": "Network;FileTransfer;",
       "desktop": {
         "StartupNotify": "true"
