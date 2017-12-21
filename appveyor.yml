@@ -4,8 +4,6 @@ environment:
     secure: b06koRZfV6qLnE8RPcbaiUFIXIA3xc9PkepUZTOnpjAa6LnSKmW3RWCE2CZHSiMs
   COZY_PASSPHRASE:
     secure: 3pxc1SL46fjXrugWO5AtTOyrNKZRka4pSWDDTJOBA3A=
-  GH_TOKEN:
-    secure: p2VhpPUotfXPrCDqq/0+E3bP8X+hEuXvVCSqxFEUM6UiKzdbxRAWLswxUo9br6Xw
   MOCHA_TIMEOUT: "60000"
 
 install:
