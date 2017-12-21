@@ -195,7 +195,6 @@
       "buildResources": "gui/assets"
     },
     "win": {
-      "certificateSubjectName": "Cozy Cloud SAS",
       "target": [
         "nsis"
       ]
