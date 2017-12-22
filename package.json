@@ -209,7 +209,8 @@
     },
     "linux": {
       "target": [
-        "AppImage"
+        "AppImage",
+        "snap"
       ],
       "artifactName": "CozyDrive-${version}-${arch}.${ext}",
       "executableName": "CozyDrive",
@@ -222,6 +223,9 @@
     },
     "appImage": {
       "systemIntegration": "doNotAsk"
+    },
+    "snap": {
+      "plugs": ["default", "desktop"]
     }
   }
 }
